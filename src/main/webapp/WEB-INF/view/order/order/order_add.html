@@ -5,16 +5,16 @@
 
             <div class="row">
                 <div class="col-sm-6 b-r">
-                            <#input id="id" name="主键" underline="true"/>
-                            <#input id="goodsName" name="商品名称" underline="true"/>
-                            <#input id="place" name="下单地点" underline="true"/>
-                            <#input id="createTime" name="下单时间"/>
+                    <#input id="id" name="" underline="true" type="hidden"/>
+                    <#input id="goodsName" name="商品名称" underline="true"/>
+                    <#input id="place" name="下单地点" underline="true"/>
+                    <#input id="createTime" name="下单时间" type="text"/>
                 </div>
 
                 <div class="col-sm-6">
-                            <#input id="userName" name="下单用户名称" underline="true"/>
-                            <#input id="userPhone" name="下单用户电话" underline="true"/>
-                            <#input id="goodsImg" name="商品图片" underline="true"/>
+                    <#input id="userName" name="下单用户名称" underline="true"/>
+                    <#input id="userPhone" name="下单用户电话" underline="true"/>
+                    <#input id="goodsImg" name="商品图片" underline="true"/>
                 </div>
             </div>
 
@@ -29,4 +29,11 @@
     </div>
 </div>
 <script src="${ctxPath}/static/modular/order/order/order_info.js"></script>
+<script>
+    laydate.render({
+        elem: '#createTime',
+        type: 'datetime',
+        trigger: 'click'
+    });
+</script>
 @}
