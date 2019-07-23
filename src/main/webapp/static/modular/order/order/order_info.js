@@ -45,7 +45,6 @@ OrderInfoDlg.close = function() {
  */
 OrderInfoDlg.collectData = function() {
     this
-    .set('id')
     .set('goodsName')
     .set('place')
     .set('createTime')

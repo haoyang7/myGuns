@@ -82,9 +82,16 @@ public enum BizExceptionEnum implements AbstractBaseExceptionEnum {
     SIGN_ERROR(700, "签名验证失败"),
 
     /**
+     * 时间处理异常
+     */
+    INVLIDE_DATE_STRING(400, "输入的字符串不能转化为日期"),
+    DATE_FORMAT_ERROR(400, "日期格式错误"),
+
+    /**
      * 其他
      */
     AUTH_REQUEST_ERROR(400, "账号密码错误");
+
 
     BizExceptionEnum(int code, String message) {
         this.code = code;

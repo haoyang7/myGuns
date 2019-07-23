@@ -1,11 +1,15 @@
 package cn.mystudy.myguns.modular.system.model;
 
 import com.baomidou.mybatisplus.enums.IdType;
+
 import java.util.Date;
+
 import com.baomidou.mybatisplus.annotations.TableId;
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableName;
+import org.springframework.format.annotation.DateTimeFormat;
+
 import java.io.Serializable;
 
 /**
@@ -38,6 +42,7 @@ public class Order extends Model<Order> {
     /**
      * 下单时间
      */
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @TableField("create_time")
     private Date createTime;
     /**
@@ -121,13 +126,13 @@ public class Order extends Model<Order> {
     @Override
     public String toString() {
         return "Order{" +
-        ", id=" + id +
-        ", goodsName=" + goodsName +
-        ", place=" + place +
-        ", createTime=" + createTime +
-        ", userName=" + userName +
-        ", userPhone=" + userPhone +
-        ", goodsImg=" + goodsImg +
-        "}";
+                ", id=" + id +
+                ", goodsName=" + goodsName +
+                ", place=" + place +
+                ", createTime=" + createTime +
+                ", userName=" + userName +
+                ", userPhone=" + userPhone +
+                ", goodsImg=" + goodsImg +
+                "}";
     }
 }
