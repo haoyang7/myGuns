@@ -1,4 +1,4 @@
-# My Guns
+# My Guns(gunsV5.1)
 ---
 ## 介绍
 Guns基于SpringBoot 2，致力于做更简洁的后台管理系统，完美整合springmvc + shiro + 
@@ -121,7 +121,7 @@ mybatis-plus + beetl!Guns项目代码简洁，注释丰富，上手容易，同�
   以Properties结尾的类，这些类的作用是启动应用的时候把application.yml中的配置映射到类
   的属性上，使用时需要注意以下几点
   
-  ![图片](https://img-blog.csdnimg.cn/20181228174639902)
+  ![分包](img/20181228174639902)
   
   modular存放按业务划分的业务代码，若本模块中包含多个模块业务，则在modular中建立多个
   业务包，在具体的业务包下再建立controller、dao、service、transfer、warpper这几个包，
@@ -135,7 +135,217 @@ mybatis-plus + beetl!Guns项目代码简洁，注释丰富，上手容易，同�
 
   这样拆分的好处在于把业务，配置和运行机制清晰的拆分开，提高项目的可维护性，加快项目的开
   发效率!
+  
+- 4.2 统一异常拦截
+  
+  4.2.1 介绍
+  
+  统一异常拦截指对程序抛出的异常利用@ControllerAdvice在统一的一个类中做catch处理，
+  在Guns中，我们在GlobalExceptionHandler类中做统一异常拦截处理，GlobalExceptionHandler类
+  中可以拦截所有控制器执行过程中抛出的异常，若需要拦截其他包下的异常可以参考
+  SessionInterceptor这个类中AOP的写法，来拦截其他特定包的异常。统一异常拦截的写法
+  注意一下几点 
+  
+  
+  ![统一异常拦截](img/20181228174639953)
+  
+  4.2.2 优点
 
+  对异常进行统一处理，不需要再在业务代码中进行try catch操作，尽情写业务，有异常也会被
+  自动拦截到，并且自动处理返回给前端提示
+
+  4.2.3 关于性能
+
+  有人可能会认为利用异常拦截这种机制，把业务逻辑的错误都用业务异常抛出进入aop的执行器，
+  对性能会有所影响，经过笔者的调研和测试，频繁的抛出异常和try catch不会有性能损耗，
+  主要的性能损耗在catch方法内部，并且在catch内，记录日志比较占用大部分的时间
+
+  所以，如果是系统特别注重性能等问题，可以把业务异常分为两类，一类是较为频繁抛出的业务
+  异常，一类是较少出现次数的业务异常，第一类异常可以再@ExceptionHandler中不做日志记录
+  ，只进行简单的返回操作，第二类可以着重做异常处理，并做结果返回
+  
+- 4.3 结果包装器
+
+  我们在进行列表查询或详情查询的过程中，查到的结果中，有些值可能在数据库中存的是一些
+  列数字(一般为状态值等)，但是我们要返回给前端，业务人员看的时候不希望直接返回给他们
+  这些不直观的值(例如1，2，3，4)，我们更希望返回给前端中文名称(例如启用，冻结，已删除)
+  ，所以我们应该对这些数值做一下包装，把他们包装成文字描述
+
+  4.3.1 如何使用
+
+  以查询用户列表的接口为例，不包装的情况下默认的查询结果为这些字段
+  
+  ![字段](img/201812281746400)
+  
+  其中性别，角色，部门，状态都是数值或者id类型，我们需要把他们包装成文字形式返回给前端
+
+  1.首先建立UserWarpper类继承BaseControllerWarpper类 
+  
+  ```
+  // 用户管理的包装类
+  public class UserWarpper extends BaseControllerWrapper {
+
+    public UserWarpper(Map<String, Object> single) {
+        super(single);
+    }
+
+    public UserWarpper(List<Map<String, Object>> multi) {
+        super(multi);
+    }
+
+    public UserWarpper(Page<Map<String, Object>> page) {
+        super(page);
+    }
+
+    public UserWarpper(PageResult<Map<String, Object>> pageResult) {
+        super(pageResult);
+    }
+
+    @Override
+    protected void wrapTheMap(Map<String, Object> map) {
+        map.put("sexName", ConstantFactory.me().getSexName((Integer) map.get("sex")));
+        map.put("roleName", ConstantFactory.me().getRoleName((String) map.get("roleid")));
+        map.put("deptName", ConstantFactory.me().getDeptName((Integer) map.get("deptid")));
+        map.put("statusName", ConstantFactory.me().getStatusName((Integer) map.get("status")));
+    }
+  }
+  ```
+  通过查看BaseControllerWarpper类可了解到被包装的参数必须为**Map**或者**List**类型
+  ```
+  public abstract class BaseControllerWrapper {
+
+    private Page<Map<String, Object>> page = null;
+
+    private PageResult<Map<String, Object>> pageResult = null;
+
+    private Map<String, Object> single = null;
+
+    private List<Map<String, Object>> multi = null;
+
+    public BaseControllerWrapper(Map<String, Object> single) {
+        this.single = single;
+    }
+
+    public BaseControllerWrapper(List<Map<String, Object>> multi) {
+        this.multi = multi;
+    }
+
+    public BaseControllerWrapper(Page<Map<String, Object>> page) {
+        if (page != null && page.getRecords() != null) {
+            this.page = page;
+            this.multi = page.getRecords();
+        }
+    }
+
+    public BaseControllerWrapper(PageResult<Map<String, Object>> pageResult) {
+        if (pageResult != null && pageResult.getRows() != null) {
+            this.pageResult = pageResult;
+            this.multi = pageResult.getRows();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T wrap() {
+
+        /**
+         * 包装结果
+         */
+        if (single != null) {
+            wrapTheMap(single);
+        }
+        if (multi != null) {
+            for (Map<String, Object> map : multi) {
+                wrapTheMap(map);
+            }
+        }
+
+        /**
+         * 根据请求的参数响应
+         */
+        if (page != null) {
+            return (T) page;
+        }
+        if (pageResult != null) {
+            return (T) pageResult;
+        }
+        if (single != null) {
+            return (T) single;
+        }
+        if (multi != null) {
+            return (T) multi;
+        }
+
+        return null;
+    }
+
+    protected abstract void wrapTheMap(Map<String, Object> map);
+  }
+  ```
+  我们继承BaseControllerWarpper类主要是为了实现warpTheMap()方法，也就是具体的包装
+  过程，warpTheMap()方法的参数map就是被包装的原始数据的每个条目，我们可以在这每个条目
+  中增加一些字段也就是被包装字段的中文名称，如下 
+  
+  ![被包装字段的中文名称](img/2018122817464044)
+
+
+  4.3.2 ConstantFactory
+
+  在包装过程中，我们经常会用到ConstantFactory这个类，这个类是连接**数据库**和**包装类**的
+  桥梁，我们可以在ConstantFactory中封装一些编辑的查询方法，这些方法通常会被多个包装类
+  多次调用，并且在调用这些方法的时候ConstantFactory.me()的形式静态调用，可以快速的
+  包装一些状态和id，非常方便，在ConstantFactory中我们可以利用spring cache的
+  @Cacheable注解来缓存一些数据，把这些频繁的查询缓存起来
+  
+- 4.4 前端思想
+  
+  Guns前端采用了beetl模板引擎，beetl包含语法简洁，速度快，文档全，社区活跃等众多优点，所有的beetl语法都以@开头
+  
+  4.4.1 布局
+
+  在用户登录页面后进入的是index.html页面，这个页面加载了整个后台管理系统的框架，我们可以看到index.html
+  源代码中把整个页面分为了三部分，左侧菜单栏，右侧页面和右侧主题栏部分，其实就是利用**beetl的@include**把整个
+  大的复杂的页面细化了，这样好维护
+  
+  ![index.html](img/2018122817464090)
+  
+  左侧菜单和右侧主题栏部分在用户登录后会一直不变，除非刷新浏览器页面，动态变化的是页面右侧这部分，我们打开6个
+  标签页，并打开浏览器F12调试
+
+  ![index.html](img/20181228174640135)
+  
+  新建和切换标签，页面的地址不会变化，变化的是页面右侧的iframe这部分
+
+  下面我们分析一下右侧页面的组成，我们打开菜单管理页面，查看他的代码
+  
+  ```
+  @layout("/common/_container.html"){
+  <div class="row">
+  XXXX等html代码...
+  </div>
+  <script src="${ctxPath}/static/modular/system/menu/menu.js"></script>
+  @}
+  ```
+  
+  整个页面被@layout所包围，@layout是beetl的引用布局(具体用法文档可以查看beetl的官方文档)，Guns中内置了
+  /common/_container.html这样一个布局，可以把/common/_container.html理解为一个html的抽象封装，我们每
+  个页面都继承自这个模板，默认包含了一系列通用的js css引用等，这样写即简化了我们的开发和维护，又使我们的
+  代码简洁有序，在/common/_container.html中的${layoutContent}就代表我们每个页面不同的html
+
+  4.4.2 标签
+
+  为了把一些重复性的html封装起来，我们使用了beetl的标签，这些标签的本质是把重复性的html代码用一行html
+  标签替代，从而方便使用，易于维护，这些标签都放在common/tags这个文件夹 
+  
+  ![index.html](img/20181228174640190)
+  
+  标签中的一些属性例如${name} ${id}等属性均为当被调用时，从调用体的属性传来
+  <#xxxTag name="xxx" id="xxx">
+  
+  4.4.3 手动新增标签页
+
+  新版Guns提供了手动新增标签页的方法Feng.newCrontab(href,menuName);
+  第一个参数是新打开tab页面的地址，第二个参数是新增tag页面的标签名称。
+  
 --- 
 ## 问题记录
 1. 添加一条订单记录时，出现
