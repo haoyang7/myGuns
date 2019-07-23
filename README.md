@@ -72,3 +72,30 @@ Guns基于SpringBoot 2，致力于做更简洁的后台管理系统，完美整�
             trigger: 'click'
         });
     ```
+2. spring boot热部署
+- 2.1 重新加载html
+  
+  修改html之后按快捷键CTRL+F9
+- 2.2 重新加载java类
+  
+  2.2.1 在application.yml中修改spring.devtools.restart.enabled=true
+  
+  2.2.2 idea配置 选中Build Project automatically
+  
+  2.2.3 按下 Ctrl+Shift+Alt+/，选择Registry 选中compiler.automake.allow.when.app.running
+3. 修改项目名和包名
+- 3.1 修改项目名
+  - 3.1.1 右击项目，点Refactor->Rename
+  - 3.1.2 修改模块名称 Rename Module
+  - 3.1.3 修改pom的artifactId改为myguns
+- 3.2 修改包名
+  - 3.2.1 选择cn.stylefeng.guns包，仍然为右键refactor->Rename
+  - 3.2.2 弹出对话框选择，Rename all，输入project
+  - 3.2.3 修改包名称，再次选择cn.stylefeng.project包，右键refactor->Rename，选择Rename Package，输入要改的名字
+  - 3.2.4 改完后项目可能有些类报错，进去把这些类没用的import删掉就好
+  - 3.2.5 修改application.yml中的mybatis-plus.typeAliasesPackage，改为现在的包名
+  - 3.2.6 修改logback-spring.xml配置文件中的springProfile下的logger包名
+  - 3.2.7 修改mapper扫描相关的包配置，在config\datasource修改包名为现在的包名（多数据源的也要修改）
+  - 3.2.8 修改SessionHolderInterceptor类的扫描配置,在core\interceptor，修改包名为现在的包名
+  - 3.2.9 修改WebConfig中的相关配置，在\config\web，修改JdkRegexpMethodPointcut.patterns的包名为现在的包名
+  - 3.2.10 另外，检查aop相关的包扫描，默认可能ide已经帮你改掉了，如果没改得自己改下

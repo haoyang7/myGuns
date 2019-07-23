@@ -21,7 +21,7 @@ spring:
       prefix: /WEB-INF/view
   devtools:
     restart:
-      enabled: false
+      enabled: true
       additional-paths: src/main/java
       exclude: static/**,WEB-INF/view/**
   servlet:
@@ -30,7 +30,7 @@ spring:
       max-file-size: 100MB
 
 mybatis-plus:
-  typeAliasesPackage: cn.stylefeng.guns.modular.system.model
+  typeAliasesPackage: cn.mystudy.myguns.modular.system.model
 
 log:
   path: guns-logs
