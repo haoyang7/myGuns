@@ -2,13 +2,57 @@
  * 初始化订单管理详情对话框
  */
 var OrderInfoDlg = {
-    orderInfoData : {}
+    orderInfoData: {},
+    validateFields: {
+        goodsName: {
+            validators: {
+                notEmpty: {
+                    message: '商品名称不能为空'
+                }
+            }
+        },
+        place: {
+            validators: {
+                notEmpty: {
+                    message: '下单地点不能为空'
+                }
+            }
+        },
+        createTime: {
+            validators: {
+                notEmpty: {
+                    message: '下单时间不能为空'
+                }
+            }
+        },
+        userName: {
+            validators: {
+                notEmpty: {
+                    message: '下单用户名称不能为空'
+                }
+            }
+        },
+        userPhone: {
+            validators: {
+                notEmpty: {
+                    message: '下单用户电话不能为空'
+                }
+            }
+        },
+        goodsImg: {
+            validators: {
+                notEmpty: {
+                    message: '商品图片不能为空'
+                }
+            }
+        }
+    }
 };
 
 /**
  * 清除数据
  */
-OrderInfoDlg.clearData = function() {
+OrderInfoDlg.clearData = function () {
     this.orderInfoData = {};
 }
 
@@ -18,7 +62,7 @@ OrderInfoDlg.clearData = function() {
  * @param key 数据的名称
  * @param val 数据的具体值
  */
-OrderInfoDlg.set = function(key, val) {
+OrderInfoDlg.set = function (key, val) {
     this.orderInfoData[key] = (typeof val == "undefined") ? $("#" + key).val() : val;
     return this;
 }
@@ -29,44 +73,56 @@ OrderInfoDlg.set = function(key, val) {
  * @param key 数据的名称
  * @param val 数据的具体值
  */
-OrderInfoDlg.get = function(key) {
+OrderInfoDlg.get = function (key) {
     return $("#" + key).val();
 }
 
 /**
  * 关闭此对话框
  */
-OrderInfoDlg.close = function() {
+OrderInfoDlg.close = function () {
     parent.layer.close(window.parent.Order.layerIndex);
 }
 
 /**
  * 收集数据
  */
-OrderInfoDlg.collectData = function() {
+OrderInfoDlg.collectData = function () {
     this
-    .set('goodsName')
-    .set('place')
-    .set('createTime')
-    .set('userName')
-    .set('userPhone')
-    .set('goodsImg');
+        .set('goodsName')
+        .set('place')
+        .set('createTime')
+        .set('userName')
+        .set('userPhone')
+        .set('goodsImg');
 }
+
+/**
+ * 验证数据
+ */
+OrderInfoDlg.validate = function () {
+    $('#orderInfoForm').data("bootstrapValidator").resetForm();
+    $('#orderInfoForm').bootstrapValidator('validate');
+    return $("#orderInfoForm").data('bootstrapValidator').isValid();
+};
 
 /**
  * 提交添加
  */
-OrderInfoDlg.addSubmit = function() {
-
+OrderInfoDlg.addSubmit = function () {
     this.clearData();
     this.collectData();
 
+    if (!this.validate()) {
+        return;
+    }
+
     //提交信息
-    var ajax = new $ax(Feng.ctxPath + "/order/add", function(data){
+    var ajax = new $ax(Feng.ctxPath + "/order/add", function (data) {
         Feng.success("添加成功!");
         window.parent.Order.table.refresh();
         OrderInfoDlg.close();
-    },function(data){
+    }, function (data) {
         Feng.error("添加失败!" + data.responseJSON.message + "!");
     });
     ajax.set(this.orderInfoData);
@@ -76,23 +132,27 @@ OrderInfoDlg.addSubmit = function() {
 /**
  * 提交修改
  */
-OrderInfoDlg.editSubmit = function() {
-
+OrderInfoDlg.editSubmit = function () {
     this.clearData();
     this.collectData();
 
+    if (!this.validate()) {
+        return;
+    }
+
     //提交信息
-    var ajax = new $ax(Feng.ctxPath + "/order/update", function(data){
+    var ajax = new $ax(Feng.ctxPath + "/order/update", function (data) {
         Feng.success("修改成功!");
         window.parent.Order.table.refresh();
         OrderInfoDlg.close();
-    },function(data){
+    }, function (data) {
         Feng.error("修改失败!" + data.responseJSON.message + "!");
     });
     ajax.set(this.orderInfoData);
     ajax.start();
 }
 
-$(function() {
+$(function () {
+    Feng.initValidator("orderInfoForm", OrderInfoDlg.validateFields);
 
 });

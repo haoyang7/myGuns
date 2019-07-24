@@ -346,6 +346,109 @@ mybatis-plus + beetl!Guns项目代码简洁，注释丰富，上手容易，同�
   新版Guns提供了手动新增标签页的方法Feng.newCrontab(href,menuName);
   第一个参数是新打开tab页面的地址，第二个参数是新增tag页面的标签名称。
   
+5. 对订单管理的添加和修改做数据验证
+- 5.1 在order_add.html和order_edit.html的div添加 id属性
+  
+  ```
+  <div class="form-horizontal" id="orderInfoForm">
+  ```
+  
+- 5.2 在order_info.js 
+  
+  1.OrderInfoDlg添加validateFields
+  
+  ```
+  var OrderInfoDlg = {
+    orderInfoData: {},
+    validateFields: {
+        goodsName: {
+            validators: {
+                notEmpty: {
+                    message: '商品名称不能为空'
+                }
+            }
+        },
+        place: {
+            validators: {
+                notEmpty: {
+                    message: '下单地点不能为空'
+                }
+            }
+        },
+        createTime: {
+            validators: {
+                notEmpty: {
+                    message: '下单时间不能为空'
+                }
+            }
+        },
+        userName: {
+            validators: {
+                notEmpty: {
+                    message: '下单用户名称不能为空'
+                }
+            }
+        },
+        userPhone: {
+            validators: {
+                notEmpty: {
+                    message: '下单用户电话不能为空'
+                }
+            }
+        },
+        goodsImg: {
+            validators: {
+                notEmpty: {
+                    message: '商品图片不能为空'
+                }
+            }
+        }
+    }
+  };
+  ```
+  
+  2.在 $(function (){});添加Feng.initValidator，第一个参数为之前在html里加上的
+  id属性，第二个参数为上面OrderInfoDlg添加的validateFields
+  
+  ```
+  $(function () {
+    Feng.initValidator("orderInfoForm", OrderInfoDlg.validateFields);
+  });
+  ```
+  
+  3.添加做数据验证的函数
+  
+  ```
+  OrderInfoDlg.validate = function () {
+    $('#orderInfoForm').data("bootstrapValidator").resetForm();
+    $('#orderInfoForm').bootstrapValidator('validate');
+    return $("#orderInfoForm").data('bootstrapValidator').isValid();
+  };
+  ```
+  
+  4.在提交添加和提交修改的函数里调用if (!this.validate()) {return;}
+  
+  ```
+  OrderInfoDlg.addSubmit = function () {
+    this.clearData();
+    this.collectData();
+    //提交信息前的验证
+    if (!this.validate()) {
+        return;
+    }
+
+    //提交信息
+    var ajax = new $ax(Feng.ctxPath + "/order/add", function (data) {
+        Feng.success("添加成功!");
+        window.parent.Order.table.refresh();
+        OrderInfoDlg.close();
+    }, function (data) {
+        Feng.error("添加失败!" + data.responseJSON.message + "!");
+    });
+    ajax.set(this.orderInfoData);
+    ajax.start();
+  }
+  ```
 --- 
 ## 问题记录
 1. 添加一条订单记录时，出现
@@ -431,7 +534,7 @@ mybatis-plus + beetl!Guns项目代码简洁，注释丰富，上手容易，同�
     
     解决方法：
     
-    自定义ToolUtil,里面复制之前调用的core包下的ToolUtil，新增函数dateToStr
+    1.自定义ToolUtil,里面复制之前调用的core包下的ToolUtil，新增函数dateToStr
     
     ```
     /**
@@ -450,7 +553,13 @@ mybatis-plus + beetl!Guns项目代码简洁，注释丰富，上手容易，同�
     }
     ```
     
-    再改input.tag下的
+    2.修改BeetlConfiguration下的ToolUtil为本项目包的ToolUtil
+    
+    ```
+    import cn.mystudy.myguns.core.util.ToolUtil;
+    ```
+    
+    3.再改input.tag下的
     
     ```
     @if(isNotEmpty(value)){
