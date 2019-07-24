@@ -363,4 +363,97 @@ mybatis-plus + beetl!Guns项目代码简洁，注释丰富，上手容易，同�
     @TableField("create_time")
     private Date createTime;
     ```
-2. 
+    
+2. 在修改订单里的创建时间只有年月日
+
+    beetl标签input.tag 
+    
+    ```
+    @if(isNotEmpty(value)){
+        value="${tool.dateType(value)}"
+    @}
+    ```
+    
+    tool在BeetlConfiguration中注册
+    
+    ```
+    groupTemplate.registerFunctionPackage("tool", new ToolUtil());
+    ```
+    
+    在ToolUtil中找到dateType方法
+    
+    ```
+    /**
+     * 判断一个对象是否是时间类型
+     *
+     * @author stylefeng
+     * @Date 2017/4/18 12:55
+     */
+    public static String dateType(Object o) {
+        if (o instanceof Date) {
+            return DateUtil.formatDate((Date) o);
+        } else {
+            return o.toString();
+        }
+    }
+    ```
+    
+    发现它是先判断一个对象是否是时间类型，如果是则通过DateUtil转换格式
+    
+    再到DateUtil中找formatDate方法
+    
+    ```
+    /**
+	 * 格式化日期部分（不包括时间）<br>
+	 * 格式 yyyy-MM-dd
+	 * 
+	 * @param date 被格式化的日期
+	 * @return 格式化后的字符串
+	 */
+	public static String formatDate(Date date) {
+		if (null == date) {
+			return null;
+		}
+		return DatePattern.NORM_DATE_FORMAT.format(date);
+	}
+    ```
+    
+    返回DatePattern.NORM_DATE_FORMAT.format(date)，找到DatePattern.NORM_DATE_FORMAT
+    
+    ```
+    /** 标准日期格式：yyyy-MM-dd */
+	public final static String NORM_DATE_PATTERN = "yyyy-MM-dd";
+	/** 标准日期格式 {@link FastDateFormat}：yyyy-MM-dd */
+	public final static FastDateFormat NORM_DATE_FORMAT = FastDateFormat.getInstance(NORM_DATE_PATTERN);
+    ```
+    
+    可以看出返回的时间格式是yyyy-MM-dd
+    
+    解决方法：
+    
+    自定义ToolUtil,里面复制之前调用的core包下的ToolUtil，新增函数dateToStr
+    
+    ```
+    /**
+     * dateToStr(yyyy-MM-dd HH:mm:ss)
+     *
+     * @param o
+     * @return
+     */
+    public static String dateToStr(Object o) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        if (o instanceof Date) {
+            return dateFormat.format((Date) o);
+        } else {
+            return o.toString();
+        }
+    }
+    ```
+    
+    再改input.tag下的
+    
+    ```
+    @if(isNotEmpty(value)){
+        value="${tool.dateToStr(value)}"
+    @}
+    ```

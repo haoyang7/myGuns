@@ -17,7 +17,7 @@ package cn.mystudy.myguns.core.beetl;
 
 import cn.mystudy.myguns.core.tag.DictSelectorTag;
 import cn.mystudy.myguns.core.util.KaptchaUtil;
-import cn.stylefeng.roses.core.util.ToolUtil;
+import cn.mystudy.myguns.core.util.ToolUtil;
 import org.beetl.core.Context;
 import org.beetl.core.Function;
 import org.beetl.ext.spring.BeetlGroupUtilConfiguration;

@@ -5,10 +5,10 @@
 
             <div class="row">
                 <div class="col-sm-6 b-r">
-                            <#input id="id" name="主键" value="${item.id}" underline="true"/>
+                            <#input id="id" name="" value="${item.id}" type="hidden"/>
                             <#input id="goodsName" name="商品名称" value="${item.goodsName}" underline="true"/>
                             <#input id="place" name="下单地点" value="${item.place}" underline="true"/>
-                            <#input id="createTime" name="下单时间" value="${item.createTime}" />
+                            <#input id="createTime" name="下单时间" value="${item.createTime}" type="text" />
                 </div>
 
                 <div class="col-sm-6">
@@ -29,4 +29,11 @@
     </div>
 </div>
 <script src="${ctxPath}/static/modular/order/order/order_info.js"></script>
+<script>
+    laydate.render({
+        elem: '#createTime',
+        type: 'datetime',
+        trigger: 'click'
+    });
+</script>
 @}
