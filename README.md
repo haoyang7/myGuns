@@ -413,7 +413,7 @@ mybatis-plus + beetl!Guns项目代码简洁，注释丰富，上手容易，同�
             }
         }
     }
-};
+  };
   ```
   
   2.在 $(function (){});添加Feng.initValidator，第一个参数为之前在html里加上的
@@ -468,9 +468,6 @@ mybatis-plus + beetl!Guns项目代码简洁，注释丰富，上手容易，同�
     
     解决方法：在Order类的createTime上添加注解@DateTimeFormat，pattern为需要转换为什么形式
     ```
-    /**
-     * 下单时间
-     */
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @TableField("create_time")
     private Date createTime;
