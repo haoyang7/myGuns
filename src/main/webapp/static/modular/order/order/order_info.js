@@ -161,7 +161,21 @@ OrderInfoDlg.editSubmit = function () {
     ajax.start();
 }
 
+/**
+ * 加载图片
+ */
+OrderInfoDlg.openPicture = function () {
+    $("#showAllImage").viewer({url: 'data-original'});
+};
+
+
 $(function () {
     Feng.initValidator("orderInfoForm", OrderInfoDlg.validateFields);
 
+    /**
+     * 初始化图片上传
+     */
+    var avatarUp = new $WebUpload("goodsImg");
+    avatarUp.setUploadBarId("progressBar");
+    avatarUp.init();
 });

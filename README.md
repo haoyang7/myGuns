@@ -458,6 +458,157 @@ mybatis-plus + beetl!Guns项目代码简洁，注释丰富，上手容易，同�
     ajax.start();
   }
   ```
+  
+6. 订单管理上传图片和显示图片 参考[github.com/happyfish100 fastdfs-client-java ](https://github.com/happyfish100/fastdfs-client-java)
+- 6.1 pom.xml添加fastdfs依赖
+  
+  ```
+  <dependency>
+      <groupId>org.csource</groupId>
+      <artifactId>fastdfs-client-java</artifactId>
+      <version>1.27-SNAPSHOT</version>
+  </dependency>
+  ```
+  
+- 6.2 配置fdfs_client.conf(此处使用本地虚拟机做测试)
+  
+  ```
+  tracker_server = 192.168.1.166:22122
+  ```
+
+- 6.3 导入FastdfsUtil类
+
+- 6.4 在WEB-INF.view下新建lib文件夹，把fastdfs-client-java-1.27-SNAPSHOT.jar放到lib下
+并 add as library
+
+- 6.5 在_container.html引入js和css文件
+  
+  ```
+  <link href="${ctxPath}/static/css/plugins/viewer/viewer.min.css" rel="stylesheet">
+  <link href="${ctxPath}/static/css/build.css" rel="stylesheet">
+  
+  <!--图片插件-->
+  <script src="${ctxPath}/static/js/plugins/viewer/viewer.min.js"></script>
+  <script src="${ctxPath}/static/js/common/fileDownload.js"></script>
+  ```
+
+- 6.6 把UserMgrController下的upload请求的函数改为
+  
+  ```
+  @RequestMapping(method = RequestMethod.POST, path = "/upload")
+  @ResponseBody
+  public Object upload(@RequestPart("file") MultipartFile picture) {
+      String[] fielpath = null;
+      try {
+          fielpath = FastdfsUtil.uploadFile(picture, picture.getOriginalFilename(), picture.getSize());
+      } catch (IOException e) {
+          e.printStackTrace();
+      }
+      return Const.file_url + fielpath[0] + "/" + fielpath[1];
+  }
+  ```
+  
+  其中Const.file_url为
+  
+  ```
+  /**
+  * 下载文件的url
+  */
+  String file_url = "http://192.168.1.166:8888/";
+  ```
+  
+- 6.7 修改order_add.html和order_edit.html的goodsImg标签
+  
+  1.order_add.html
+  ```
+  <#avatar id="goodsImg" name="商品图片" />
+      <div class="progress progress-striped" id="progressTipArea" style="margin-top: 20px;">
+           <div id="progressBar" style="width: 0%" aria-valuemax="100" aria-valuemin="0" aria-valuenow="0" role="progressbar" class="progress-bar progress-bar-info">
+           </div>
+      </div>
+  <div class="hr-line-dashed"></div>
+  ```
+  
+  2.order_edit.html
+  ```
+  <#avatar id="goodsImg" name="商品图片" avatarImg="${item.goodsImg}" />
+      <div class="progress progress-striped" id="progressTipArea" style="margin-top: 20px;">
+           <div id="progressBar" style="width: 0%" aria-valuemax="100" aria-valuemin="0" aria-valuenow="0" role="progressbar" class="progress-bar progress-bar-info">
+           </div>
+      </div>
+  <div class="hr-line-dashed"></div>
+  ```
+- 6.8 修改order_info.js
+  
+  1.在 $(function (){});
+  ```
+  /**
+  * 初始化图片上传
+  */
+  var avatarUp = new $WebUpload("goodsImg");
+  avatarUp.setUploadBarId("progressBar");
+  avatarUp.init();
+  ```
+  
+  2.添加加载图片的函数
+  ```
+  /**
+  * 加载图片
+  */
+  OrderInfoDlg.openPicture = function()
+  {
+      $("#showAllImage").viewer({url: 'data-original'});
+  };
+  ```
+  
+- 6.9 修改order.js 
+  
+  1.initColumn
+  ```
+  title: '商品图片', field: 'goodsImg', visible: true, align: 'center', valign: 'middle',
+      formatter: function (value, row, index) {
+          var imhUrls = row.goodsImg;
+          var id = row.id;
+          var imgArr = imhUrls.split(",");
+          var htmls = "";
+          var imgHtml = "";
+          if (imgArr[0] != '' && imgArr[0] != null && imgArr[0] != undefined) {
+              for (var i = 1; i < imgArr.length; i++) {
+                  htmls += '<li>' + '<img src=" ' + imgArr[i] + '" style="width: 100%;height: 100%;display: none;list-style-type: none">' + '</li>';
+              }
+              var html = '<li style="text-align: center">' + '<img align="center"  src="' + imgArr[0] + '" style="width: 80px;height: 50px;" onclick= "Order.showImg(\'' + id + '\')"  />' + '</li>';
+              imgHtml = html + htmls;
+              var htmlimg = '<ul id="showAllImages' + id + '" style="list-style-type: none;width: 80px;height: 50px">' + imgHtml + '</ul>';
+              return htmlimg;
+          } else {
+             return;
+          }
+      }
+  }
+  ```
+  
+  2.添加函数
+  
+  ```
+  /**
+  * 显示图片
+  * @param imgURL
+  */
+  Order.showImg = function (id) {
+    $("#showAllImages" + id).viewer({url: 'data-original'});
+  };
+  /**
+   * 图片加载失败的提示
+   */
+  $("#img").on("error", function () {
+    $('#myModal').modal('hide');
+    if ($('#img').attr("src") != '') {
+        Feng.error("图片加载失败！")
+    }
+  });
+  ```
+  
+  
 --- 
 ## 问题记录
 1. 添加一条订单记录时，出现
@@ -572,3 +723,32 @@ mybatis-plus + beetl!Guns项目代码简洁，注释丰富，上手容易，同�
         value="${tool.dateToStr(value)}"
     @}
     ```
+    
+3. 本地虚拟机启动fastdfs文件服务器
+  
+  防火墙
+  ```
+  #不关闭防火墙的话无法使用
+  systemctl stop firewalld.service #关闭
+  systemctl restart firewalld.service #重启
+  ```
+  tracker
+  ```
+  /etc/init.d/fdfs_trackerd start #启动tracker服务
+  /etc/init.d/fdfs_trackerd restart #重启动tracker服务
+  /etc/init.d/fdfs_trackerd stop #停止tracker服务
+  chkconfig fdfs_trackerd on #自启动tracker服务
+  ```
+  storage
+  ```
+  /etc/init.d/fdfs_storaged start #启动storage服务
+  /etc/init.d/fdfs_storaged restart #重动storage服务
+  /etc/init.d/fdfs_storaged stop #停止动storage服务
+  chkconfig fdfs_storaged on #自启动storage服务
+  ```
+  nginx
+  ```
+  /usr/local/nginx/sbin/nginx #启动nginx
+  /usr/local/nginx/sbin/nginx -s reload #重启nginx
+  /usr/local/nginx/sbin/nginx -s stop #停止nginx
+  ```

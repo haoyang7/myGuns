@@ -14,13 +14,33 @@ var Order = {
 Order.initColumn = function () {
     return [
         {field: 'selectItem', radio: true},
-            // {title: '主键', field: 'id', visible: false, align: 'center', valign: 'middle'},
-            {title: '商品名称', field: 'goodsName', visible: true, align: 'center', valign: 'middle'},
-            {title: '下单地点', field: 'place', visible: true, align: 'center', valign: 'middle'},
-            {title: '下单时间', field: 'createTime', visible: true, align: 'center', valign: 'middle'},
-            {title: '下单用户名称', field: 'userName', visible: true, align: 'center', valign: 'middle'},
-            {title: '下单用户电话', field: 'userPhone', visible: true, align: 'center', valign: 'middle'},
-            {title: '商品图片', field: 'goodsImg', visible: true, align: 'center', valign: 'middle'}
+        // {title: '主键', field: 'id', visible: false, align: 'center', valign: 'middle'},
+        {title: '商品名称', field: 'goodsName', visible: true, align: 'center', valign: 'middle'},
+        {title: '下单地点', field: 'place', visible: true, align: 'center', valign: 'middle'},
+        {title: '下单时间', field: 'createTime', visible: true, align: 'center', valign: 'middle'},
+        {title: '下单用户名称', field: 'userName', visible: true, align: 'center', valign: 'middle'},
+        {title: '下单用户电话', field: 'userPhone', visible: true, align: 'center', valign: 'middle'},
+        {
+            title: '商品图片', field: 'goodsImg', visible: true, align: 'center', valign: 'middle',
+            formatter: function (value, row, index) {
+                var imhUrls = row.goodsImg;
+                var id = row.id;
+                var imgArr = imhUrls.split(",");
+                var htmls = "";
+                var imgHtml = "";
+                if (imgArr[0] != '' && imgArr[0] != null && imgArr[0] != undefined) {
+                    for (var i = 1; i < imgArr.length; i++) {
+                        htmls += '<li>' + '<img src=" ' + imgArr[i] + '" style="width: 100%;height: 100%;display: none;list-style-type: none">' + '</li>';
+                    }
+                    var html = '<li style="text-align: center">' + '<img align="center"  src="' + imgArr[0] + '" style="width: 80px;height: 50px;" onclick= "Order.showImg(\'' + id + '\')"  />' + '</li>';
+                    imgHtml = html + htmls;
+                    var htmlimg = '<ul id="showAllImages' + id + '" style="list-style-type: none;width: 80px;height: 50px">' + imgHtml + '</ul>';
+                    return htmlimg;
+                } else {
+                    return;
+                }
+            }
+        }
     ];
 };
 
@@ -29,10 +49,10 @@ Order.initColumn = function () {
  */
 Order.check = function () {
     var selected = $('#' + this.id).bootstrapTable('getSelections');
-    if(selected.length == 0){
+    if (selected.length == 0) {
         Feng.info("请先选中表格中的某一记录！");
         return false;
-    }else{
+    } else {
         Order.seItem = selected[0];
         return true;
     }
@@ -81,7 +101,7 @@ Order.delete = function () {
         }, function (data) {
             Feng.error("删除失败!" + data.responseJSON.message + "!");
         });
-        ajax.set("orderId",this.seItem.id);
+        ajax.set("orderId", this.seItem.id);
         ajax.start();
     }
 };
@@ -94,6 +114,23 @@ Order.search = function () {
     queryData['condition'] = $("#condition").val();
     Order.table.refresh({query: queryData});
 };
+
+/**
+ * 显示图片
+ * @param imgURL
+ */
+Order.showImg = function (id) {
+    $("#showAllImages" + id).viewer({url: 'data-original'});
+};
+/**
+ * 图片加载失败的提示
+ */
+$("#img").on("error", function () {
+    $('#myModal').modal('hide');
+    if ($('#img').attr("src") != '') {
+        Feng.error("图片加载失败！")
+    }
+});
 
 $(function () {
     var defaultColunms = Order.initColumn();

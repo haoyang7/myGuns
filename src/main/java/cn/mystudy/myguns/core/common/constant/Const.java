@@ -48,4 +48,9 @@ public interface Const {
      */
     String API_MENU_NAME = "接口文档";
 
+    /**
+     * 下载文件的url
+     */
+    String file_url = "http://192.168.1.166:8888/";
+
 }

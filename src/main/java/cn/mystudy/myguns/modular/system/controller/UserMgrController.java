@@ -26,6 +26,7 @@ import cn.mystudy.myguns.core.common.exception.BizExceptionEnum;
 import cn.mystudy.myguns.core.log.LogObjectHolder;
 import cn.mystudy.myguns.core.shiro.ShiroKit;
 import cn.mystudy.myguns.core.shiro.ShiroUser;
+import cn.mystudy.myguns.core.util.FastdfsUtil;
 import cn.mystudy.myguns.modular.system.factory.UserFactory;
 import cn.mystudy.myguns.modular.system.model.User;
 import cn.mystudy.myguns.modular.system.service.IUserService;
@@ -37,6 +38,8 @@ import cn.stylefeng.roses.core.reqres.response.ResponseData;
 import cn.stylefeng.roses.core.util.ToolUtil;
 import cn.stylefeng.roses.kernel.model.exception.ServiceException;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -46,11 +49,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.naming.NoPermissionException;
 import javax.validation.Valid;
-import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * 系统管理员控制器
@@ -61,7 +63,7 @@ import java.util.UUID;
 @Controller
 @RequestMapping("/mgr")
 public class UserMgrController extends BaseController {
-
+    private static Logger logger = LoggerFactory.getLogger(UserMgrController.class);
     private static String PREFIX = "/system/user/";
 
     @Autowired
@@ -350,21 +352,38 @@ public class UserMgrController extends BaseController {
         return SUCCESS_TIP;
     }
 
+//    /**
+//     * 上传图片
+//     */
+//    @RequestMapping(method = RequestMethod.POST, path = "/upload")
+//    @ResponseBody
+//    public String upload(@RequestPart("file") MultipartFile picture) {
+//
+//        String pictureName = UUID.randomUUID().toString() + "." + ToolUtil.getFileSuffix(picture.getOriginalFilename());
+//        try {
+//            String fileSavePath = gunsProperties.getFileUploadPath();
+//            picture.transferTo(new File(fileSavePath + pictureName));
+//        } catch (Exception e) {
+//            throw new ServiceException(BizExceptionEnum.UPLOAD_ERROR);
+//        }
+//        return pictureName;
+//    }
+
     /**
      * 上传图片
      */
     @RequestMapping(method = RequestMethod.POST, path = "/upload")
     @ResponseBody
-    public String upload(@RequestPart("file") MultipartFile picture) {
-
-        String pictureName = UUID.randomUUID().toString() + "." + ToolUtil.getFileSuffix(picture.getOriginalFilename());
+    public Object upload(@RequestPart("file") MultipartFile picture) {
+        String[] fielpath = null;
         try {
-            String fileSavePath = gunsProperties.getFileUploadPath();
-            picture.transferTo(new File(fileSavePath + pictureName));
-        } catch (Exception e) {
-            throw new ServiceException(BizExceptionEnum.UPLOAD_ERROR);
+            fielpath = FastdfsUtil.uploadFile(picture, picture.getOriginalFilename(), picture.getSize());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        return pictureName;
+        String fileUrl = Const.file_url + fielpath[0] + "/" + fielpath[1];
+        logger.info("--!上传成功,图片url:" + fileUrl);
+        return fileUrl;
     }
 
     /**
