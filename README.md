@@ -726,29 +726,29 @@ mybatis-plus + beetl!Guns项目代码简洁，注释丰富，上手容易，同�
     
 3. 本地虚拟机启动fastdfs文件服务器
   
-  防火墙
-  ```
-  #不关闭防火墙的话无法使用
-  systemctl stop firewalld.service #关闭
-  systemctl restart firewalld.service #重启
-  ```
-  tracker
-  ```
-  /etc/init.d/fdfs_trackerd start #启动tracker服务
-  /etc/init.d/fdfs_trackerd restart #重启动tracker服务
-  /etc/init.d/fdfs_trackerd stop #停止tracker服务
-  chkconfig fdfs_trackerd on #自启动tracker服务
-  ```
-  storage
-  ```
-  /etc/init.d/fdfs_storaged start #启动storage服务
-  /etc/init.d/fdfs_storaged restart #重动storage服务
-  /etc/init.d/fdfs_storaged stop #停止动storage服务
-  chkconfig fdfs_storaged on #自启动storage服务
-  ```
-  nginx
-  ```
-  /usr/local/nginx/sbin/nginx #启动nginx
-  /usr/local/nginx/sbin/nginx -s reload #重启nginx
-  /usr/local/nginx/sbin/nginx -s stop #停止nginx
-  ```
+    防火墙
+    ```
+    #不关闭防火墙的话无法使用
+    systemctl stop firewalld.service #关闭
+    systemctl restart firewalld.service #重启
+    ```
+    tracker
+    ```
+    /etc/init.d/fdfs_trackerd start #启动tracker服务
+    /etc/init.d/fdfs_trackerd restart #重启动tracker服务
+    /etc/init.d/fdfs_trackerd stop #停止tracker服务
+    chkconfig fdfs_trackerd on #自启动tracker服务
+    ```
+    storage
+    ```
+    /etc/init.d/fdfs_storaged start #启动storage服务
+    /etc/init.d/fdfs_storaged restart #重动storage服务
+    /etc/init.d/fdfs_storaged stop #停止动storage服务
+    chkconfig fdfs_storaged on #自启动storage服务
+    ```
+    nginx
+    ```
+    /usr/local/nginx/sbin/nginx #启动nginx
+    /usr/local/nginx/sbin/nginx -s reload #重启nginx
+    /usr/local/nginx/sbin/nginx -s stop #停止nginx
+    ```
