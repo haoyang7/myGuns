@@ -355,7 +355,7 @@ mybatis-plus + beetl!Guns项目代码简洁，注释丰富，上手容易，同�
   
 - 5.2 在order_info.js 
   
-  1.OrderInfoDlg添加validateFields
+  1.OrderInfoDlg添加validateFields(可以做长度验证，正则匹配等等)
   
   ```
   var OrderInfoDlg = {
@@ -365,6 +365,11 @@ mybatis-plus + beetl!Guns项目代码简洁，注释丰富，上手容易，同�
             validators: {
                 notEmpty: {
                     message: '商品名称不能为空'
+                },
+                stringLength: {
+                    min: 1,
+                    max: 30,
+                    message: '商品名称长度必须在1到30位之间'
                 }
             }
         },
@@ -393,7 +398,11 @@ mybatis-plus + beetl!Guns项目代码简洁，注释丰富，上手容易，同�
             validators: {
                 notEmpty: {
                     message: '下单用户电话不能为空'
-                }
+                },
+                regexp: {
+                    regexp: /^1([38][0-9]|4[579]|5[0-3,5-9]|6[6]|7[0135678]|9[89])\d{8}$/,
+                    message: '下单用户电话格式错误'
+                },
             }
         },
         goodsImg: {
@@ -404,7 +413,7 @@ mybatis-plus + beetl!Guns项目代码简洁，注释丰富，上手容易，同�
             }
         }
     }
-  };
+};
   ```
   
   2.在 $(function (){});添加Feng.initValidator，第一个参数为之前在html里加上的

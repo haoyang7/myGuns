@@ -8,6 +8,11 @@ var OrderInfoDlg = {
             validators: {
                 notEmpty: {
                     message: '商品名称不能为空'
+                },
+                stringLength: {
+                    min: 1,
+                    max: 30,
+                    message: '商品名称长度必须在1到30位之间'
                 }
             }
         },
@@ -36,7 +41,11 @@ var OrderInfoDlg = {
             validators: {
                 notEmpty: {
                     message: '下单用户电话不能为空'
-                }
+                },
+                regexp: {
+                    regexp: /^1([38][0-9]|4[579]|5[0-3,5-9]|6[6]|7[0135678]|9[89])\d{8}$/,
+                    message: '下单用户电话格式错误'
+                },
             }
         },
         goodsImg: {
